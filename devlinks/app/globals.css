@@ -3,5 +3,13 @@
 @tailwind utilities;
 
 body{
-  background-color: white;
+  background-color: #F0F0F0;
+}
+
+
+.details{
+  position: absolute;
+  left: 50%;
+  top: 10%;
+  transform: translate(-50%, -10%);
 }
