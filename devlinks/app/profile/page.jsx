@@ -4,6 +4,9 @@ import Navbar from "../components/Navbar"
 import Image from "next/image"
 import phone from '../../public/assets/phone.png'
 import { useGlobalState } from "../globalstate/context"
+import Link from "next/link"
+
+
 
 export default function Profile() {
     const [selectedImage, setSelectedImage] = useState()
@@ -12,7 +15,9 @@ export default function Profile() {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [loading, setLoading] = useState(false)
-    const {dispatch} = useGlobalState()
+    const {dispatch, state} = useGlobalState()
+    const userData = state.data || {}
+    const {userEmail, userFirstName, userLastName, userImage, userLinks} =  userData || {}
 
     function handleChange(e) {
         const file = e.target.files[0];
@@ -37,10 +42,12 @@ export default function Profile() {
       await dispatch({
         type: 'SET_DATA',
         payload: {
-          image: selectedImage,
-          firstName: firstName,
-          lastName: lastName,
-          email: email,
+          userImage: selectedImage,
+          userFirstName: firstName,
+          userLastName: lastName,
+          userEmail: email,
+          userLinks: userLinks,
+          userPassword : password
         },
       });
     } catch (error) {
@@ -58,15 +65,15 @@ export default function Profile() {
     <Image src={phone} alt="phone" className="w-full" />
     <div className="details flex flex-col items-center">
       <div className="img-cont w-1/2">
-        <Image src={selectedImage} alt='pfp' width='200' height='200' className=" border rounded-full"/>
+        <Image src={userImage ? userImage : selectedImage} alt='pfp' width='200' height='200' className=" border rounded-full"/>
       </div>
-      <h1 className="m-2 text-xl">{firstName} {lastName}</h1>
-      <p className="m-2">{email}</p>
+      <h1 className="m-2 text-xl">{userFirstName || firstName} {userLastName || lastName}</h1>
+      <p className="m-2">{userEmail || email}</p>
 
       <div className="links w-full">
-        <div className="w-full bg-red-500 rounded-md m-2 p-2 box-border">Link 1</div>
-        <div className="w-full bg-red-500 rounded-md m-2 p-2 box-border">Link 2</div>
-        <div className="w-full bg-red-500 rounded-md m-2 p-2 box-border">Link 3</div>
+        {userLinks && userLinks.length > 0 ? userLinks.map((link, index)=>{
+          return <Link  key={index} href={link.link}><div className="w-full bg-red-500 rounded-md m-2 p-2 box-border">{link.name}</div></Link>
+        }) : ''}
       </div>
     </div>
   </div>

@@ -1,6 +1,6 @@
 'use client'
 import Link from "next/link"
-import {usePathname} from 'next/navigation'
+import {usePathname, useRouter} from 'next/navigation'
 import Image from "next/image"
 import eye from '../../public/assets/eye.svg'
 import link from '../../public/assets/link.svg'
@@ -9,6 +9,9 @@ import profile from '../../public/assets/profile.svg'
 
 export default function Navbar(){
    const currrentPath = usePathname()
+   const router = useRouter()
+
+
     const routes = [
         {
             name : "Links",
@@ -36,7 +39,7 @@ export default function Navbar(){
             <Link href='/profile'><Image src={profile} height='30' weight='30' className="m-2"/></Link>
         </ul>
 
-        <button className=" text-xl mr-3 p-2 border border-black hover:bg-black hover:text-white hidden md:block">Preview</button>
+        <button className="text-xl mr-3 p-2 border border-black hover:bg-black hover:text-white hidden md:block" onClick={()=> router.push('/preview')}>Preview</button>
         <Image src={eye} height='30' weight='30' className="mr-3 block md:hidden"/>
         </nav>
     )

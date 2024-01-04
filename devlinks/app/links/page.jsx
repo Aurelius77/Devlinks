@@ -8,10 +8,11 @@ import Link from "next/link"
 
 
 export default function Links(){
-    const {state} = useGlobalState()
+    const {state, dispatch} = useGlobalState()
+    const [loading, setLoading] = useState(false)
     const userData = state.data || {}
-    const {email, firstName, lastName, image} =  userData || {}
-    const [links, setLinks] = useState([
+    const {userEmail, userFirstName, userLastName, userImage, userLinks, userPassword} =  userData || {}
+    const [links, setLinks] = useState(userLinks ? userLinks :[
       {name: 'Github', link: 'https://yourgithub.com'},
       {name : 'Portfolio', link:'https://yourportfolio.com'}
     ])
@@ -26,23 +27,55 @@ export default function Links(){
     function newLink(){
        setLinks([...links, {name:'', link:''}])
     }
+
+    function handleRemoval(index){
+      const newLinks = links.filter((link, i)=> i !== index)
+      setLinks(newLinks)
+    }
     
+function saveLinks(){
+  setLoading(true); // Set loading state to true at the start of the action
+  
+  setTimeout(async () => {
+    setLoading(false); // Set loading state back to false after a brief delay
+    try {
+      await dispatch({
+        type: 'SET_DATA',
+        payload: {
+          userLinks : links,
+          userImage: userImage,
+          userFirstName: userFirstName,
+          userLastName: userLastName,
+          userEmail: userEmail,
+          userPassword : userPassword
+        },
+      });
+      
+      
+    } catch (error) {
+      console.error(error);
+    }
+  }, 1000); // 100 milliseconds delay (adjust as needed)
+      console.log(userLinks)
+    }
+
+    const devLinks = userLinks && userLinks.length > 0 ? userLinks : links
     
     return(
         <>
         <Navbar/>
-        <main className="flex mt-8">
-         <div className="relative w-1/2">
+        <main className="lg:flex mt-8">
+         <div className=" hidden lg:block relative w-1/2">
     <Image src={phone} alt="phone" className="w-full" />
     <div className="details flex flex-col items-center">
       <div className="img-cont w-1/2">
-        <Image src={image} alt='pfp' width='200' height='200' className=" border rounded-full"/>
+        <Image src={userImage} alt='pfp' width='200' height='200' className=" border rounded-full"/>
       </div>
-      <h1 className="m-2 text-xl">{firstName} {lastName}</h1>
-      <p className="m-2">{email}</p>
+      <h1 className="m-2 text-xl">{userFirstName} {userLastName}</h1>
+      <p className="m-2">{userEmail}</p>
 
       <div className="links w-full">
-        {links.map((link, index)=>{
+        {devLinks.map((link, index)=>{
          return <Link href={link.link} key={index}><div className="w-full bg-red-500 rounded-md m-2 p-2 box-border">{link.name}</div></Link>
         })}
       </div>
@@ -53,13 +86,15 @@ export default function Links(){
   <div className='right'>
     <h1 className="text-xl font-bold lg:mt-5 mb-2">Customise your links</h1>
     <p>Add/remove links to your profile below and then share</p>
-    <button className="p-3 mt-5 w-full border border-black text-purple-500">Add new link</button>
+    <button className="p-3 mt-5 w-full border border-black text-purple-500" onClick={()=>newLink()}>Add new link</button>
 
-    <div className="border border-gray-300 rounded-md p-4 mb-4">
+    {devLinks.map((link, index)=>{
+      return <div className="border border-gray-300 rounded-md p-4 mb-4 mt-3" key={index}>
       <div className="flex justify-between mb-4">
         <span>Link</span>
         <button
           className="bg-red-500 text-white px-3 py-1 rounded-md"
+          onClick={()=>handleRemoval(index)}
         >
           Remove
         </button>
@@ -67,13 +102,20 @@ export default function Links(){
       <div className="flex flex-col">
         <input
           className="border border-gray-300 rounded-md px-3 py-2 mb-2"
-          placeholder="Name"
+          placeholder={link.name || 'Name'}
+          onChange={(e)=>updateLinks(index, e.target.value, link.link)}
         />
         <input
           className="border border-gray-300 rounded-md px-3 py-2"
-          placeholder="Link"
+          placeholder={link.link || 'Link'}
+          onChange={(e)=>updateLinks(index, link.name, e.target.value)}
         />
       </div>
+    </div>
+    })}
+
+    <div className="w-full flex justify-end">
+    <button className="mr-2 bg-blue-500 text-white px-3 py-1 rounded-md mt-3 " onClick={saveLinks}>{loading ? 'Saving' : 'Save'}</button>
     </div>
   </div>
         </main>
