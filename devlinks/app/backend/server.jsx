@@ -32,3 +32,20 @@ export async function run(userFirstName, userLastName, userImage, userEmail, use
     }
 }
 
+
+
+export async function getUser(email){
+    try{
+     await client.connect();
+     let db = client.db('devlinks').collection('devs')
+     let data = await db.findOne({email : email})
+     return data
+    }
+    catch(err){
+        console.log(err)
+        return {sucesss:true, message: 'Something went wrong. Please try again'}
+    }
+    finally{
+     await client.close();
+    }
+}

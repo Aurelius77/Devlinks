@@ -25,6 +25,9 @@ export default function Preview(){
     setResponse(result.message)
     setLoading(!loading)
     setShowPopup(!showPopup)
+    setInterval(() => {
+      router.push(`/user/${userEmail}`)
+    }, 1000);
   }
 
      function redirectToLink(url){
