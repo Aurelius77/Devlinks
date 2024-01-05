@@ -1,2 +1,2 @@
 # Devlinks
-Link sharing app for developers
+Devlinks, my linksharing and creation site for developers
