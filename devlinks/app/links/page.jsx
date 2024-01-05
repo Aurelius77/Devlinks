@@ -59,6 +59,15 @@ function saveLinks(){
       console.log(userLinks)
     }
 
+    function redirectToLink(url){
+  if(url.startsWith('http')){
+    window.location.href = url
+  }
+  else{
+    window.location.href = 'https://' + url
+  }
+}
+
     const devLinks = userLinks && userLinks.length > 0 ? userLinks : links
     
     return(
@@ -76,7 +85,7 @@ function saveLinks(){
 
       <div className="links w-full">
         {devLinks.map((link, index)=>{
-         return <Link href={link.link} key={index}><div className="w-full bg-red-500 rounded-md m-2 p-2 box-border">{link.name}</div></Link>
+         return <div key={index} className="w-full bg-red-500 rounded-md m-2 p-2 box-border" onClick={()=>redirectToLink(link.link)}>{link.name}</div>
         })}
       </div>
     </div>

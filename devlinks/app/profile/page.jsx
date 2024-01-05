@@ -56,6 +56,15 @@ export default function Profile() {
   }, 500); // 100 milliseconds delay (adjust as needed)
 }
 
+function redirectToLink(url){
+  if(url.startsWith('http')){
+    window.location.href = url
+  }
+  else{
+    window.location.href = 'https://' + url
+  }
+}
+
   return (
     <>
     <Navbar/>
@@ -72,7 +81,7 @@ export default function Profile() {
 
       <div className="links w-full">
         {userLinks && userLinks.length > 0 ? userLinks.map((link, index)=>{
-          return <Link  key={index} href={link.link}><div className="w-full bg-red-500 rounded-md m-2 p-2 box-border">{link.name}</div></Link>
+          return <div className="w-full bg-red-500 rounded-md m-2 p-2 box-border" onClick={()=>redirectToLink(link.link)}>{link.name}</div>
         }) : ''}
       </div>
     </div>

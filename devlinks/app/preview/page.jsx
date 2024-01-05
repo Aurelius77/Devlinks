@@ -8,13 +8,9 @@ import { useState } from "react";
 
 export default function Preview(){
   const [response, setResponse] = useState('')
-  async function Run(){
-    const result = await run(userFirstName, userLastName, userImage, userEmail, userPassword, userLinks)
-    setResponse(result.message)
-    setShowPopup(!showPopup)
-  }
   const router = useRouter()
    const [showPopup, setShowPopup] = useState(false)
+   const [loading, setLoading] = useState(false)
     const {state} = useGlobalState()
     const userData = state.data || {}
     const {userFirstName, userLastName, userEmail, userImage, userLinks, userPassword} = userData
@@ -22,13 +18,30 @@ export default function Preview(){
     function closePopup(){
         setShowPopup(!showPopup)
      }
+
+     async function Run(){
+      setLoading(!loading)
+    const result = await run(userFirstName, userLastName, userImage, userEmail, userPassword, userLinks)
+    setResponse(result.message)
+    setLoading(!loading)
+    setShowPopup(!showPopup)
+  }
+
+     function redirectToLink(url){
+  if(url.startsWith('http')){
+    window.location.href = url
+  }
+  else{
+    window.location.href = 'https://' + url
+  }
+}
  
     return(
     <>
     <div className="bg-purple-600 w-full rounded-b-md box-border p-12">
      <nav className="bg-white p-2 m-3 rounded-md flex justify-between items-center">
        <p className="text-purple-600 border border-purple-600 p-2 m-1" onClick={()=>router.push('/profile')}>Back to Editor</p>
-       <p className="bg-purple-600 text-white rounded-md p-2 m-1" onClick={()=>Run()}>Share Link</p>
+       <p className={`${loading ? 'cursor-not-allowed bg-purple-600 text-white rounded-md p-2 m-1' : 'bg-purple-600 text-white rounded-md p-2 m-1 cursor-pointer'}`} onClick={()=>Run()}>{loading ? 'Please Wait' : 'Share Link'}</p>
      </nav>
 
     </div>
@@ -40,7 +53,7 @@ export default function Preview(){
          <p className="p-2 m-2">{userEmail || ''}</p>
          <div className="links w-full">
         {userLinks && userLinks.length>0 ?userLinks.map((link, index)=>{
-         return <Link href={link.link} key={index}><div className="w-full bg-red-500 rounded-md m-2 p-2">{link.name}</div></Link>
+         return <div className="w-full bg-red-500 rounded-md m-2 p-2" key={index} onClick={()=>redirectToLink(link.link)}>{link.name}</div>
         }): ''}
       </div>
        </div>
