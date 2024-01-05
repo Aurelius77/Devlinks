@@ -81,7 +81,7 @@ function redirectToLink(url){
 
       <div className="links w-full">
         {userLinks && userLinks.length > 0 ? userLinks.map((link, index)=>{
-          return <div className="w-full bg-red-500 rounded-md m-2 p-2 box-border" onClick={()=>redirectToLink(link.link)}>{link.name}</div>
+          return <div key={index} className="w-full bg-red-500 rounded-md m-2 p-2 box-border" onClick={()=>redirectToLink(link.link)}>{link.name}</div>
         }) : ''}
       </div>
     </div>
