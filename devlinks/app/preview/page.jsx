@@ -4,16 +4,26 @@ import Image from "next/image";
 import { useGlobalState } from "../globalstate/context";
 import { useRouter } from "next/navigation";
 import { run } from "../backend/server";
+import { useState } from "react";
 
 export default function Preview(){
+  const [response, setResponse] = useState('')
   async function Run(){
-     await run(userFirstName, userLastName, userImage, userEmail, userPassword, userLinks)
+    const result = await run(userFirstName, userLastName, userImage, userEmail, userPassword, userLinks)
+    setResponse(result.message)
+    setShowPopup(!showPopup)
   }
   const router = useRouter()
+   const [showPopup, setShowPopup] = useState(false)
     const {state} = useGlobalState()
     const userData = state.data || {}
     const {userFirstName, userLastName, userEmail, userImage, userLinks, userPassword} = userData
-  return(
+ 
+    function closePopup(){
+        setShowPopup(!showPopup)
+     }
+ 
+    return(
     <>
     <div className="bg-purple-600 w-full rounded-b-md box-border p-12">
      <nav className="bg-white p-2 m-3 rounded-md flex justify-between items-center">
@@ -36,6 +46,17 @@ export default function Preview(){
        </div>
      </div>
 
+
+{showPopup && (
+        <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-80 z-50">
+          <div className="bg-green-500 p-5 rounded-md shadow-lg">
+            <p className='text'>{response}</p>
+            <button onClick={closePopup} className="mt-3 bg-white text-green-500 p-2 rounded-md">
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </>
   )
 }
