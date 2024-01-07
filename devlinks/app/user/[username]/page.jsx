@@ -40,8 +40,8 @@ export default function User({ params }) {
         <>
           <div className="bg-purple-600 w-full rounded-b-md box-border p-12">
            <nav className="bg-white p-2 m-3 rounded-md flex justify-between items-center">
-       <p className="text-purple-600 border border-purple-600 p-2 m-1" onClick={()=>router.push('/profile')}>Get yours</p>
-       <p className='bg-purple-600 text-white rounded-md p-2 m-1 cursor-pointer'>Edit</p>
+       <p className="text-purple-600 border border-purple-600 p-2 m-1 cursor-pointer" onClick={()=>router.push('/profile')}>Get yours</p>
+       <p className='bg-purple-600 text-white rounded-md p-2 m-1 cursor-pointer' onClick={()=>router.push('/login')}>Edit</p>
      </nav>
           </div>
 

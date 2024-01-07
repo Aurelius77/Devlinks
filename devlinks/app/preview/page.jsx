@@ -23,11 +23,14 @@ export default function Preview(){
       setLoading(!loading)
     const result = await run(userFirstName, userLastName, userImage, userEmail, userPassword, userLinks)
     setResponse(result.message)
+    if(result.sucesss === false){
+       setLoading(!loading)
+    setShowPopup(!showPopup)
+    return
+    }
     setLoading(!loading)
     setShowPopup(!showPopup)
-    setInterval(() => {
       router.push(`/user/${userEmail}`)
-    }, 1000);
   }
 
      function redirectToLink(url){

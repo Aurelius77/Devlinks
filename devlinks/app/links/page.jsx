@@ -56,7 +56,6 @@ function saveLinks(){
       console.error(error);
     }
   }, 1000); // 100 milliseconds delay (adjust as needed)
-      console.log(userLinks)
     }
 
     function redirectToLink(url){

@@ -35,12 +35,12 @@ export default function Navbar(){
         </ul>
 
         <ul className="flex items-center p-3 md:hidden">
-            <Link href='/links'><Image src={link} height='30' weight='30' className="m-2"/></Link>
-            <Link href='/profile'><Image src={profile} height='30' weight='30' className="m-2"/></Link>
+            <Link href='/links'><Image src={link} height='30' weight='30' className="m-2" alt='links'/></Link>
+            <Link href='/profile'><Image src={profile} height='30' weight='30' className="m-2" alt='profile'/></Link>
         </ul>
 
         <button className="text-xl mr-3 p-2 border border-black hover:bg-black hover:text-white hidden md:block" onClick={()=> router.push('/preview')}>Preview</button>
-        <Image src={eye} height='30' weight='30' className="mr-3 block md:hidden"/>
+        <Image src={eye} height='30' weight='30' className="mr-3 block md:hidden" alt='preview'/>
         </nav>
     )
 }
