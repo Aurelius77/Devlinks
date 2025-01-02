@@ -1,62 +1,71 @@
-'use server'
+'use server';
 
-import { MongoClient } from "mongodb"
+import { MongoClient } from 'mongodb';
+import bcrypt from 'bcrypt';
 
 const uri = process.env.MONGO_URI;
-
 const client = new MongoClient(uri);
 
-//Login
+async function connectToDB() {
+    if (!client.isConnected()) {
+        await client.connect();
+    }
+    return client.db('devlinks').collection('devs');
+}
+
+// Login
 export async function login(email, password) {
     try {
-        await client.connect()
-        const db = client.db('devlinks').collection('devs');
+        const db = await connectToDB();
         const user = await db.findOne({ email: email });
 
         if (!user) {
             return { success: false, message: 'Incorrect Details' };
         }
-        if (user.password !== password) {
+
+
+        const match = await bcrypt.compare(password, user.password);
+        if (!match) {
             return { success: false, message: 'Incorrect Password' };
         }
 
-        return { success: true, message: user };
-    }
-    catch (error) {
-        console.error('Login Error:', error);
-        return { success: false, message: 'Something went wrong. Please try again' };
-    } finally {
 
-        if (client) {
-            await client.close();
-        }
+        const userVal = {
+            email: user.email,
+            id: user._id,
+        };
+
+        return { success: true, message: 'Login successful', user: userVal };
+    } catch (error) {
+        console.error('Login Error:', error);
+        return { success: false, message: 'Something went wrong. Please try again.' };
     }
 }
 
-//Register
+// Register
 export async function Register(email, password) {
     try {
-        await client.connect();
-        const user = {
-            "name": userFirstName,
-            "lastname": userLastName,
-            "image": userImage,
-            "email": userEmail,
-            "password": userPassword,
-            "links": userLinks
-        }
-        let db = client.db("devlinks").collection('devs')
-        await db.insertOne(user)
-        console.log('User successfully added')
-        return { sucesss: true, message: 'Profile has been sucessfully created' }
-    }
-    catch (err) {
-        console.log(err)
-        return { sucesss: false, message: 'Something went wrong. Please try again.' }
-    }
+        const db = await connectToDB();
 
-    finally {
-        // Ensures that the client will close when you finish/error
-        await client.close();
+
+        const existingUser = await db.findOne({ email });
+        if (existingUser) {
+            return { success: false, message: 'Email already registered' };
+        }
+
+        const saltRounds = 10;
+        const hash = await bcrypt.hash(password, saltRounds);
+
+        const newUser = {
+            email,
+            password: hash
+        };
+
+        await db.insertOne(newUser);
+        console.log('User successfully added');
+        return { success: true, message: 'Profile has been successfully created' };
+    } catch (error) {
+        console.error('Register Error:', error);
+        return { success: false, message: 'Something went wrong. Please try again.' };
     }
 }
