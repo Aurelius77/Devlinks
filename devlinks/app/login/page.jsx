@@ -26,9 +26,9 @@ export default function Login(){
       return
     }
     setLoading(!loading)
-    const userEmail = data.message.email
+    const userName = data.message.username
     dispatch({type:'LOG_IN'})
-    router.push( `edit/${userEmail}`)
+    router.push( `edit/${userName}`)
    }
 
     return(

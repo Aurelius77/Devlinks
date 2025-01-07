@@ -13,7 +13,7 @@ export default function Preview(){
    const [loading, setLoading] = useState(false)
     const {state} = useGlobalState()
     const userData = state.data || {}
-    const {userFirstName, userLastName, userEmail, userImage, userLinks, userPassword} = userData
+    const {userFirstName, userLastName, userEmail, userImage, userLinks, userPassword, userName} = userData
  
     function closePopup(){
         setShowPopup(!showPopup)
@@ -21,7 +21,7 @@ export default function Preview(){
 
      async function Run(){
       setLoading(!loading)
-    const result = await run(userFirstName, userLastName, userImage, userEmail, userPassword, userLinks)
+    const result = await run(userFirstName, userLastName, userImage, userEmail, userPassword, userLinks, userName)
     setResponse(result.message)
     if(result.sucesss === false){
        setLoading(!loading)
@@ -30,7 +30,7 @@ export default function Preview(){
     }
     setLoading(!loading)
     setShowPopup(!showPopup)
-      router.push(`/user/${userEmail}`)
+      router.push(`/user/${userName}`)
   }
 
      function redirectToLink(url){

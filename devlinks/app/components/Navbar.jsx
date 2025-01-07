@@ -40,7 +40,7 @@ export default function Navbar(){
         </ul>
 
         <button className="text-xl mr-3 p-2 border border-black hover:bg-black hover:text-white hidden md:block" onClick={()=> router.push('/preview')}>Preview</button>
-        <Image src={eye} height='30' weight='30' className="mr-3 block md:hidden" alt='preview'/>
+        <Image src={eye} height='30' weight='30' className="mr-3 block md:hidden" alt='preview' onClick={()=> router.push('/preview')}/>
         </nav>
     )
 }

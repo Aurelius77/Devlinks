@@ -11,7 +11,7 @@ export default function Links(){
     const {state, dispatch} = useGlobalState()
     const [loading, setLoading] = useState(false)
     const userData = state.data || {}
-    const {userEmail, userFirstName, userLastName, userImage, userLinks, userPassword} =  userData || {}
+    const {userEmail, userFirstName, userLastName, userImage, userLinks, userPassword, userName} =  userData || {}
     const [links, setLinks] = useState(userLinks ? userLinks :[
       {name: 'Github', link: 'https://yourgithub.com'},
       {name : 'Portfolio', link:'https://yourportfolio.com'}
@@ -47,7 +47,8 @@ function saveLinks(){
           userFirstName: userFirstName,
           userLastName: userLastName,
           userEmail: userEmail,
-          userPassword : userPassword
+          userPassword : userPassword,
+          userName : userName
         },
       });
       
@@ -81,6 +82,7 @@ function saveLinks(){
       </div>
       <h1 className="m-2 text-xl">{userFirstName} {userLastName}</h1>
       <p className="m-2">{userEmail}</p>
+      <p className="m-2">{userName}</p>
 
       <div className="links w-full">
         {devLinks.map((link, index)=>{

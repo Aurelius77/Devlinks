@@ -15,9 +15,10 @@ export default function Edit({params}){
         router.push('/login')
     }
 
-    const userEmail = decodeURIComponent(params.userEmail)
+    const userData = decodeURIComponent(params.userEmail)
     const [firstName, setFirstName] = useState('')
     const [lastName, setLastName] = useState('')
+    const [userName, setUserName] = useState('')
     const [email, setEmail] = useState('')
     const [img, setImg] = useState(null)
     const [links, setLinks] = useState(null)
@@ -25,13 +26,14 @@ export default function Edit({params}){
 
     useEffect(()=>{
     async function getData(){
-         const data = await getUser(userEmail)
+         const data = await getUser(userData)
 
        setFirstName(data.name)
        setLastName(data.lastname)
        setEmail(data.email)
        setImg(data.image)
        setLinks(data.links)
+       setUserName(data.username)
     }
 
     getData()
@@ -71,10 +73,10 @@ export default function Edit({params}){
 
    async function saveChanges(){
     setLoading(true)
-      const res = await updateUserInfo(email, firstName, lastName, img, links)
+      const res = await updateUserInfo(email, firstName, lastName, img, links, userName)
       setLoading(false)
       if(res.success === true){
-        router.push(`/user/${userEmail}`)
+        router.push(`/user/${userName}`)
       }
    }
 
@@ -100,6 +102,11 @@ export default function Edit({params}){
                <div className="p-2 block lg:w-3/4 lg:flex items-center mt-7 justify-between">
                 <p>Email</p>
                  <input type="email" className="md:w-3/4 w-full border rounded-md p-2" onChange={(e)=>setEmail(e.target.value)} value={email}/>
+               </div>
+
+               <div className="p-2 block lg:w-3/4 lg:flex items-center mt-7 justify-between">
+                <p>Username</p>
+                 <input type="email" className="md:w-3/4 w-full border rounded-md p-2" onChange={(e)=>setUserName(e.target.value)} value={userName}/>
                </div>
 
         </div>

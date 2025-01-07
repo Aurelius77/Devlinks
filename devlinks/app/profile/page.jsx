@@ -12,12 +12,13 @@ export default function Profile() {
     const [selectedImage, setSelectedImage] = useState()
     const [firstName, setFirstName] = useState('')
     const [lastName, setLastName] = useState('')
+    const [username, setuserName] = useState('')
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [loading, setLoading] = useState(false)
     const {dispatch, state} = useGlobalState()
     const userData = state.data || {}
-    const {userEmail, userFirstName, userLastName, userImage, userLinks} =  userData || {}
+    const {userEmail, userFirstName, userLastName, userImage, userLinks, userName} =  userData || {}
 
     function handleChange(e) {
         const file = e.target.files[0];
@@ -47,7 +48,8 @@ export default function Profile() {
           userLastName: lastName,
           userEmail: email,
           userLinks: userLinks,
-          userPassword : password
+          userPassword : password,
+          userName : username
         },
       });
     } catch (error) {
@@ -107,6 +109,11 @@ function redirectToLink(url){
                <div className="p-2 block lg:w-3/4 lg:flex items-center mt-7 justify-between">
                 <p>Email</p>
                  <input type="email" className="md:w-3/4 w-full border rounded-md p-2" onChange={(e)=>setEmail(e.target.value)} value={email}/>
+               </div>
+
+               <div className="p-2 block lg:w-3/4 lg:flex items-center mt-7 justify-between">
+                <p>Username</p>
+                 <input type="text" className="md:w-3/4 w-full border rounded-md p-2" onChange={(e)=>setuserName(e.target.value)} value={username}/>
                </div>
 
                <div className=" p-2 block lg:w-3/4 lg:flex items-center mt-7 justify-between">

@@ -1,49 +1,133 @@
-'use server'
 
-import { MongoClient} from 'mongodb';
-const nodemailer = require('nodemailer')
-const crypto = require('crypto');
+'use server';
+
+import { MongoClient } from 'mongodb';
+import bcrypt from 'bcrypt';
+import crypto from 'crypto';
+import nodemailer from 'nodemailer';
+
+let client = new MongoClient(process.env.MONGO_URI);
 
 
 
-const uri = process.env.MONGO_URI;
 
-const client = new MongoClient(uri);
+let db;
 
-export async function run(userFirstName, userLastName, userImage, userEmail, userPassword, userLinks) {
+/* async function connectToDatabase() {
+    if (!client || !client.isConnected()) {
+        client = new MongoClient(process.env.MONGO_URI);
+        await client.connect();
+        db = client.db('devlinks');
+    }
+    return db;
+} */
+
+export async function run(userFirstName, userLastName, userImage, userEmail, userPassword, userLinks, username) {
     try {
         await client.connect();
+        let db = client.db('devlinks').collection('devs')
+
         const user = {
             "name" : userFirstName,
             "lastname" : userLastName,
             "image" : userImage,
             "email" : userEmail,
             "password" : userPassword,
-            "links" : userLinks 
+            "links" : userLinks,
+            "username" : username
         }
-        let db = client.db("devlinks").collection('devs')
-        await db.insertOne(user)
-        console.log('User successfully added')
-        return {sucesss: true, message:'Profile has been sucessfully created'}
+        
+        const existingUser = await db.findOne({ 
+            $or: [{ email: userEmail }, { username: username }] 
+        });
+
+        if (existingUser) {
+            return { success: false, message: 'Email or Username already exists' };
+        }
+
+        
+        const hashedPassword = await bcrypt.hash(userPassword, 10);
+
+       
+        await db.insertOne({ ...user, password: hashedPassword });
+        return { success: true, message: 'Profile has been successfully created' };
+    } catch (err) {
+        console.error(err);
+        return { success: false, message: 'Something went wrong. Please try again.' };
     }
-    catch (err) {
-        console.log(err)
-        return {sucesss: false, message:'Something went wrong. Please try again.'}
+    
+    finally{
+      await client.close()
+    }
+}
+
+export async function login(email, password) {
+    try {
+        await client.connect();
+       let db = client.db('devlinks').collection('devs')
+
+        const user = await db.findOne({ email : email });
+        if (!user) {
+            return { success: false, message: 'Incorrect Details' };
+        }
+
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return { success: false, message: 'Incorrect Password' };
+        }
+
+        return { success: true, message: user };
+    } catch (error) {
+        console.error('Login Error:', error);
+        return { success: false, message: 'Something went wrong. Please try again' };
     }
 
-    finally {
-        // Ensures that the client will close when you finish/error
-        await client.close();
+    finally{
+      await client.close()
+    }
+}
+
+export async function sendResetEmail(email) {
+    await client.connect();
+     let db = client.db('devlinks').collection('devs')
+
+    const uniqueCode = crypto.randomBytes(3).toString('hex').toUpperCase();
+
+    await db.insertOne({ email, code: uniqueCode, createdAt: new Date() });
+
+    const transporter = nodemailer.createTransport({
+        service: 'Gmail',
+        auth: {
+            user: 'your-email@gmail.com',
+            pass: process.env.EMAIL_PASS,
+        },
+    });
+
+    const mailOptions = {
+        from: 'your-email@gmail.com',
+        to: email,
+        subject: 'Password Reset Code',
+        text: `Your password reset code is: ${uniqueCode}. It will expire in 10 minutes.`,
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        return { success: true, message: 'Code sent to your email.' };
+    } catch (error) {
+        console.error(error);
+        return { success: false, message: 'Failed to send email. Please try again.' };
+    }
+    finally{
+      await client.close()
     }
 }
 
 
-
-export async function getUser(email){
+export async function getUser(username){
     try{
      await client.connect();
      let db = client.db('devlinks').collection('devs')
-     let data = await db.findOne({email : email})
+     let data = await db.findOne({username : username})
      return data
     }
     catch(err){
@@ -52,66 +136,6 @@ export async function getUser(email){
     }
     finally{
      await client.close();
-    }
-}
-
-
-
-export async function login(email, password) {
-  try {
-     await client.connect()
-    const db = client.db('devlinks').collection('devs');
-    const user = await db.findOne({ email: email });
-
-    if (!user) {
-      return { success: false, message: 'Incorrect Details' };
-    }
-    if (user.password !== password) {
-      return { success: false, message: 'Incorrect Password' };
-    }
-
-    return { success: true, message: user }; // Return user data upon successful authentication
-  } 
-  catch (error) {
-    console.error('Login Error:', error);
-    return { success: false, message: 'Something went wrong. Please try again' };
-  } finally {
-    // Close the MongoDB connection
-    if (client) {
-      await client.close();
-    }
-  }
-}
-
-
-export async function sendResetEmail(email) {
-    const uniqueCode = crypto.randomBytes(3).toString('hex').toUpperCase();
-
-    const transporter = nodemailer.createTransport({
-        service: 'Gmail',
-        host: 'smtp.gmail.com',
-        port: 465,
-        secure: true,
-        auth: {
-            user: 'akinpeluifeoluwa007@gmail.com',
-            pass: process.env.EMAIL_PASS,
-        },
-    });
-
-    const mailOptions = {
-        from: 'akinpeluifeoluwa007@gmail.com',
-        to: email,
-        subject: 'Password Reset Code',
-        text: `Your password reset code is: ${uniqueCode}. If you didn't request this, please ignore this mail.`,
-    };
-
-    try {
-        const info = await transporter.sendMail(mailOptions);
-        console.log('Email sent: ' + info.response);
-        return { success: true, message: 'Code has been sent. Please check your mail or spam', code: uniqueCode };
-    } catch (error) {
-        console.log(error);
-        return { success: false, message: 'Something went wrong. Please try again', code: '' };
     }
 }
 
@@ -143,7 +167,7 @@ export async function resetPassword(email, password){
 }
 
 
-export async function updateUserInfo(email, firstname, lastname, image, links){
+export async function updateUserInfo(email, firstname, lastname, image, links, username){
   try{
      await client.connect()
      const db = client.db('devlinks').collection('devs')
@@ -153,7 +177,7 @@ export async function updateUserInfo(email, firstname, lastname, image, links){
         return {success: false, message:'There is no such user in the database'}
      }
     if(user){
-      await db.updateOne({email:email}, {$set:{email:email, firstname:firstname, lastname:lastname, image:image, links:links}})
+      await db.updateOne({email:email}, {$set:{email:email, firstname:firstname, lastname:lastname, image:image, links:links, username : username}})
       return {success:true, message:'Password has been updated'}
     }
   }
@@ -165,4 +189,4 @@ export async function updateUserInfo(email, firstname, lastname, image, links){
   finally{
     await client.close()
   }
-}
+} 
