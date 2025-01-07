@@ -6,9 +6,12 @@ import github from '../../public/github.svg'
 import Link from "next/link";
 import { useState } from "react";
 import { login } from "../backend/server";
+import { useRouter } from 'next/navigation';
+import { SocialLogin } from "../backend/server";
 
 
 export default function Login() {
+  const router = useRouter()
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [loading, setLoading] = useState(false)
@@ -17,8 +20,19 @@ export default function Login() {
        e.preventDefault()
        setLoading(true)
        const result = await login(email, password)
+
+       if (result.success) {
+        localStorage.setItem('authToken', result.token);
+        localStorage.setItem('user', JSON.stringify(result.user));
+
+         console.log('Login successful');
+         router.push('./profile')
+    } else {
+        console.error(result.message);
+    }
+
        setLoading(false)
-       console.log(result)
+       console.log(result) 
     }
 
   return (
@@ -57,21 +71,27 @@ export default function Login() {
             type="submit"
             className={`w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 ${loading ? `cursor-not-allowed bg-gray-100`: ''}`}
           >
-            Login
+            {loading ? 'Signing in...' : 'Login'}
           </button>
         </form>
 
 
         <div className="mt-6 flex flex-col space-y-3">
           <button
-            type="button"
+            type="submit"
+            onClick={(e)=>SocialLogin(e)}
+            name = 'action'
+            value = 'google'
             className="w-full flex items-center justify-center bg-gray-100 text-gray-800 py-2 px-4 rounded-md border hover:bg-gray-200"
           >
             <Image src={google} alt="Google" className="w-5 h-5 mr-2" />
             Login with Google
           </button>
           <button
-            type="button"
+            type="submit"
+            onClick={(e)=>SocialLogin(e)}
+            name = 'action'
+            value = 'google'
             className="w-full flex items-center justify-center bg-gray-100 text-gray-800 py-2 px-4 rounded-md border hover:bg-gray-200"
           >
             <Image src={github} alt="GitHub" className="w-5 h-5 mr-2" />

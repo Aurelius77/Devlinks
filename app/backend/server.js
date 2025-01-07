@@ -2,6 +2,10 @@
 
 import { MongoClient } from 'mongodb';
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken'
+
+
+const JWT_SECRET = process.env.JWT_SECRET
 
 const uri = process.env.MONGO_URI;
 const client = new MongoClient(uri);
@@ -16,7 +20,8 @@ async function connectToDB() {
 // Login
 export async function login(email, password) {
     try {
-        const db = await connectToDB();
+        await client.connect();
+        const db = client.db('devlinks').collection('devs');
         const user = await db.findOne({ email: email });
 
         if (!user) {
@@ -35,18 +40,21 @@ export async function login(email, password) {
             id: user._id,
         };
 
-        return { success: true, message: 'Login successful', user: userVal };
+        const token = jwt.sign(userVal, JWT_SECRET, { expiresIn: '30d' });
+
+        return { success: true, message: 'Login successful', user: userVal, token };
     } catch (error) {
         console.error('Login Error:', error);
         return { success: false, message: 'Something went wrong. Please try again.' };
     }
 }
 
-// Register
+
+//Register
 export async function Register(email, password) {
     try {
-        const db = await connectToDB();
-
+        await client.connect();
+        const db = client.db('devlinks').collection('devs');
 
         const existingUser = await db.findOne({ email });
         if (existingUser) {
@@ -56,16 +64,19 @@ export async function Register(email, password) {
         const saltRounds = 10;
         const hash = await bcrypt.hash(password, saltRounds);
 
-        const newUser = {
-            email,
-            password: hash
-        };
+        const newUser = { email, password: hash };
 
         await db.insertOne(newUser);
-        console.log('User successfully added');
         return { success: true, message: 'Profile has been successfully created' };
     } catch (error) {
         console.error('Register Error:', error);
         return { success: false, message: 'Something went wrong. Please try again.' };
+    } finally {
+        await client.close();
     }
+}
+
+export async function SocialLogin(e) {
+    const action = e
+    console.log(action)
 }
