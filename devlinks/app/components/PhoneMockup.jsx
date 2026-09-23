@@ -96,8 +96,7 @@ export default function PhoneMockup({ userData = {}, className = '', interactive
     window.open(formattedUrl, '_blank', 'noopener,noreferrer');
   };
 
-  // Static filler slots to keep device frame visually structured when empty
-  const minFillerCount = Math.max(0, 4 - displayLinks.length);
+  // No filler needed — empty state is handled with a clear placeholder
 
   return (
     <div className={`relative flex flex-col items-center justify-center p-4 ${className}`}>
@@ -149,7 +148,7 @@ export default function PhoneMockup({ userData = {}, className = '', interactive
                 {fullName}
               </h2>
             ) : (
-              <div className="w-36 h-3.5 mx-auto rounded-full bg-slate-800/40 border border-slate-700/30"></div>
+              <p className="text-sm font-semibold text-slate-500 italic px-2">Your Name</p>
             )}
           </div>
 
@@ -160,7 +159,7 @@ export default function PhoneMockup({ userData = {}, className = '', interactive
                 {displayUsername ? `@${displayUsername}` : displayEmail}
               </p>
             ) : (
-              <div className="w-20 h-2.5 mx-auto rounded-full bg-slate-800/30 border border-slate-700/20"></div>
+              <p className="text-xs text-slate-600 italic">@username</p>
             )}
           </div>
 
@@ -202,13 +201,17 @@ export default function PhoneMockup({ userData = {}, className = '', interactive
               );
             })}
 
-            {/* Clean Static Filler Link Slots */}
-            {Array.from({ length: minFillerCount }).map((_, i) => (
-              <div
-                key={`filler-${i}`}
-                className="w-full h-11 rounded-xl bg-slate-800/20 border border-dashed border-slate-700/30"
-              ></div>
-            ))}
+            {/* Empty state when no links */}
+            {displayLinks.length === 0 && (
+              <div className="flex-1 flex flex-col items-center justify-center gap-2 py-6 text-center">
+                <div className="w-10 h-10 rounded-full bg-slate-800/50 flex items-center justify-center">
+                  <svg className="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                  </svg>
+                </div>
+                <p className="text-[10px] text-slate-600 leading-tight px-2">Add links to see<br/>them here</p>
+              </div>
+            )}
           </div>
 
           {/* Bottom Device Indicator */}

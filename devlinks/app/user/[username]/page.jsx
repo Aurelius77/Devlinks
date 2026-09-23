@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { getUser } from '@/app/backend/server';
+import { getUser, trackClick } from '@/app/backend/server';
 import { useRouter } from 'next/navigation';
 import { getPlatformConfig, PlatformIcon } from '@/app/components/PlatformIcons';
 import { getCardTheme } from '@/app/components/PhoneMockup';
@@ -43,8 +43,11 @@ export default function UserPublicProfile({ params }) {
     fetchData();
   }, [params?.username]);
 
-  const handleLinkClick = (url) => {
+  const handleLinkClick = (url, shortCode) => {
     if (!url) return;
+    if (shortCode && username) {
+      trackClick(username, shortCode).catch((err) => console.error(err));
+    }
     const formattedUrl = url.startsWith('http') ? url : `https://${url}`;
     window.open(formattedUrl, '_blank', 'noopener,noreferrer');
   };
@@ -152,7 +155,7 @@ export default function UserPublicProfile({ params }) {
               return (
                 <button
                   key={idx}
-                  onClick={() => handleLinkClick(item.link)}
+                  onClick={() => handleLinkClick(item.link, item.shortCode)}
                   style={{
                     backgroundColor: platform.color,
                     color: platform.textColor,
