@@ -130,7 +130,7 @@ export default function Login() {
             </button>
 
             <div className="text-center mt-4 pt-4 border-t border-slate-800/80">
-              <span className="text-xs text-slate-400">Don't have a profile yet? </span>
+              <span className="text-xs text-slate-400">Don&apos;t have a profile yet? </span>
               <Link href="/profile" className="text-xs font-bold text-indigo-400 hover:text-indigo-300 transition-colors">
                 Create one now →
               </Link>

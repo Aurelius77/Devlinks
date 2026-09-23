@@ -55,7 +55,7 @@ export default function QRCodeModal({ url, username = 'developer', isOpen, onClo
             </svg>
           </div>
           <h2 className="text-xl font-extrabold text-white tracking-tight">Profile QR Code</h2>
-          <p className="text-xs text-slate-400 mt-1">Scan to open <span className="text-indigo-400 font-semibold">@{username}</span>'s profile</p>
+          <p className="text-xs text-slate-400 mt-1">Scan to open <span className="text-indigo-400 font-semibold">@{username}</span>&apos;s profile</p>
         </div>
 
         {/* QR Code Canvas Frame */}

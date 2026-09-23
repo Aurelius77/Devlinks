@@ -8,11 +8,11 @@ import { useGlobalState } from "@/app/globalstate/context"
 export default function Password({params}){
    const {state, dispatch} = useGlobalState()
 
-    useEffect(()=>{
-        if(state.isAuthenticated === false){
-        router.push('/login/forgot_password')
-    }
-    }, [])
+    useEffect(() => {
+      if (state.isAuthenticated === false) {
+        router.push('/login/forgot_password');
+      }
+    }, [state.isAuthenticated, router]);
 
     
     const router = useRouter()

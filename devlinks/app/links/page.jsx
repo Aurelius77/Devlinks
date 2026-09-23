@@ -152,7 +152,7 @@ export default function Links() {
                 </div>
                 <h3 className="text-base font-bold text-slate-200">No links added yet</h3>
                 <p className="text-xs text-slate-400 mt-1 max-w-sm">
-                  Click the "+ Add New Link" button above to showcase your GitHub, LinkedIn, Portfolio, and social profiles.
+                  Click the &quot;+ Add New Link&quot; button above to showcase your GitHub, LinkedIn, Portfolio, and social profiles.
                 </p>
               </div>
             ) : mounted ? (

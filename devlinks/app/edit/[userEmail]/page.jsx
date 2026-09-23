@@ -11,10 +11,6 @@ export default function Edit({params}){
     const {state, dispatch} = useGlobalState()
     const router = useRouter()
 
-    if(state.isAuthenticated===false){
-        router.push('/login')
-    }
-
     const userData = decodeURIComponent(params.userEmail)
     const [firstName, setFirstName] = useState('')
     const [lastName, setLastName] = useState('')
@@ -24,21 +20,25 @@ export default function Edit({params}){
     const [links, setLinks] = useState(null)
     const [loading, setLoading] = useState(false)
 
-    useEffect(()=>{
-    async function getData(){
-         const data = await getUser(userData)
+    useEffect(() => {
+        if (state.isAuthenticated === false) {
+            router.push('/login')
+            return
+        }
+        async function getData() {
+            const data = await getUser(userData)
+            if (data) {
+                setFirstName(data.name || '')
+                setLastName(data.lastname || '')
+                setEmail(data.email || '')
+                setImg(data.image || null)
+                setLinks(data.links || [])
+                setUserName(data.username || '')
+            }
+        }
 
-       setFirstName(data.name)
-       setLastName(data.lastname)
-       setEmail(data.email)
-       setImg(data.image)
-       setLinks(data.links)
-       setUserName(data.username)
-    }
-
-    getData()
-       
-    }, [])
+        getData()
+    }, [userData, state.isAuthenticated, router])
 
 
    function handleChange(e) {
