@@ -2,11 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
-import PhoneMockup from '../components/PhoneMockup';
+import PhoneMockup, { CARD_THEMES } from '../components/PhoneMockup';
 import Toast from '../components/Toast';
 import { useGlobalState } from '../globalstate/context';
 import { useRouter } from 'next/navigation';
-
 import { run } from '../backend/server';
 
 export default function Profile() {
@@ -20,17 +19,18 @@ export default function Profile() {
   const [username, setUsername] = useState(userData.userName || '');
   const [password, setPassword] = useState(userData.userPassword || '');
   const [selectedImage, setSelectedImage] = useState(userData.userImage || null);
+  const [selectedTheme, setSelectedTheme] = useState(userData.userTheme || 'midnight');
 
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState({ message: '', type: 'success' });
 
-  // Sync state if global data changes
   useEffect(() => {
     if (userData.userFirstName && !firstName) setFirstName(userData.userFirstName);
     if (userData.userLastName && !lastName) setLastName(userData.userLastName);
     if (userData.userEmail && !email) setEmail(userData.userEmail);
     if (userData.userName && !username) setUsername(userData.userName);
     if (userData.userImage && !selectedImage) setSelectedImage(userData.userImage);
+    if (userData.userTheme && selectedTheme === 'midnight') setSelectedTheme(userData.userTheme);
   }, [userData]);
 
   const handleImageUpload = (e) => {
@@ -60,22 +60,22 @@ export default function Profile() {
 
     setLoading(true);
     try {
-      // 1. Save to local React Context state
-      await dispatch({
-        type: 'SET_DATA',
-        payload: {
-          ...userData,
-          userFirstName: firstName,
-          userLastName: lastName,
-          userEmail: email,
-          userName: username,
-          userPassword: password,
-          userImage: selectedImage,
-          userLinks: userData.userLinks || []
-        },
-      });
+      const payload = {
+        ...userData,
+        userFirstName: firstName,
+        userLastName: lastName,
+        userEmail: email,
+        userName: username,
+        userPassword: password,
+        userImage: selectedImage,
+        userTheme: selectedTheme,
+        userLinks: userData.userLinks || []
+      };
 
-      // 2. Persist account to database if email and password are provided
+      // 1. Save to React Context
+      await dispatch({ type: 'SET_DATA', payload });
+
+      // 2. Persist to MongoDB if credentials provided
       if (email && password && username) {
         const dbRes = await run(
           firstName,
@@ -86,13 +86,12 @@ export default function Profile() {
           userData.userLinks || [],
           username
         );
-
         if (dbRes && dbRes.success === false && !dbRes.message.includes('already exists')) {
           console.warn('Database note:', dbRes.message);
         }
       }
 
-      setToast({ message: 'Profile & Account created successfully!', type: 'success' });
+      setToast({ message: 'Profile & Card Theme saved!', type: 'success' });
     } catch (err) {
       console.error(err);
       setToast({ message: 'Profile saved locally!', type: 'success' });
@@ -101,13 +100,13 @@ export default function Profile() {
     }
   };
 
-
   const previewData = {
     userFirstName: firstName,
     userLastName: lastName,
     userEmail: email,
     userName: username,
     userImage: selectedImage,
+    userTheme: selectedTheme,
     userLinks: userData.userLinks || []
   };
 
@@ -135,7 +134,7 @@ export default function Profile() {
               Profile Details
             </h1>
             <p className="text-sm text-slate-400 mt-1">
-              Add your personal info and avatar to customize your developer link card.
+              Add your personal info, avatar, and profile card theme.
             </p>
           </div>
 
@@ -182,6 +181,34 @@ export default function Profile() {
                     Remove
                   </button>
                 )}
+              </div>
+            </div>
+
+            {/* Profile Card Theme Selector */}
+            <div className="bg-slate-900/60 rounded-2xl p-5 border border-white/5 flex flex-col gap-3">
+              <span className="text-xs font-semibold text-slate-200">Profile Theme Preset</span>
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+                {CARD_THEMES.map((theme) => {
+                  const isSelected = selectedTheme === theme.id;
+                  return (
+                    <button
+                      key={theme.id}
+                      type="button"
+                      onClick={() => setSelectedTheme(theme.id)}
+                      className={`p-3 rounded-xl flex flex-col items-center gap-2 border text-xs font-semibold transition-all ${
+                        isSelected
+                          ? 'border-indigo-500 bg-indigo-500/10 text-white shadow-md'
+                          : 'border-slate-800 bg-slate-950/60 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+                      }`}
+                    >
+                      <div
+                        className="w-6 h-6 rounded-full border border-white/20 shadow-inner"
+                        style={{ backgroundColor: theme.previewColor }}
+                      ></div>
+                      <span className="truncate">{theme.name}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -244,9 +271,6 @@ export default function Profile() {
                     className="w-full pl-8 pr-4 py-2.5 rounded-xl bg-slate-950/80 border border-slate-700/80 text-white text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 placeholder-slate-500 transition-all"
                   />
                 </div>
-                <p className="text-[11px] text-slate-500 mt-1">
-                  Your public link will be: <span className="text-indigo-400 font-medium">{`devlinks/user/${username || 'username'}`}</span>
-                </p>
               </div>
 
               <div>

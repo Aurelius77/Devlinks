@@ -1,10 +1,66 @@
 'use client';
 
 import React from 'react';
-import Image from 'next/image';
 import { getPlatformConfig, PlatformIcon } from './PlatformIcons';
 
-export default function PhoneMockup({ userData = {}, className = '', interactive = false }) {
+export const CARD_THEMES = [
+  {
+    id: 'midnight',
+    name: 'Midnight',
+    bgClass: 'bg-[#0b0f19]',
+    cardBorder: 'border-white/5',
+    textPrimary: 'text-slate-100',
+    textSecondary: 'text-slate-400',
+    glowColor: 'bg-purple-600/10',
+    previewColor: '#0b0f19',
+  },
+  {
+    id: 'emerald',
+    name: 'Emerald',
+    bgClass: 'bg-[#022c22]',
+    cardBorder: 'border-emerald-500/20',
+    textPrimary: 'text-emerald-100',
+    textSecondary: 'text-emerald-400',
+    glowColor: 'bg-emerald-500/20',
+    previewColor: '#022c22',
+  },
+  {
+    id: 'cyberpunk',
+    name: 'Cyberpunk',
+    bgClass: 'bg-[#0f172a]',
+    cardBorder: 'border-cyan-500/30',
+    textPrimary: 'text-cyan-100',
+    textSecondary: 'text-pink-400',
+    glowColor: 'bg-cyan-500/20',
+    previewColor: '#0f172a',
+  },
+  {
+    id: 'purple_glow',
+    name: 'Purple Glow',
+    bgClass: 'bg-[#2e1065]',
+    cardBorder: 'border-purple-400/30',
+    textPrimary: 'text-purple-100',
+    textSecondary: 'text-purple-300',
+    glowColor: 'bg-indigo-500/20',
+    previewColor: '#2e1065',
+  },
+  {
+    id: 'minimal_light',
+    name: 'Minimal Light',
+    bgClass: 'bg-white',
+    cardBorder: 'border-slate-200',
+    textPrimary: 'text-slate-900',
+    textSecondary: 'text-slate-600',
+    glowColor: 'bg-indigo-500/5',
+    previewColor: '#ffffff',
+  },
+];
+
+export function getCardTheme(themeId) {
+  return CARD_THEMES.find((t) => t.id === themeId) || CARD_THEMES[0];
+}
+
+export default function PhoneMockup({ userData = {}, className = '', interactive = false, cardTheme: overrideTheme }) {
   const {
     userFirstName,
     userLastName,
@@ -12,13 +68,18 @@ export default function PhoneMockup({ userData = {}, className = '', interactive
     userName,
     userImage,
     userLinks = [],
+    userTheme,
     firstName,
     lastName,
     email,
     username,
     image,
-    links = []
+    links = [],
+    cardTheme: itemTheme
   } = userData;
+
+  const activeThemeId = overrideTheme || userTheme || itemTheme || 'midnight';
+  const theme = getCardTheme(activeThemeId);
 
   const displayFirstName = userFirstName || firstName || '';
   const displayLastName = userLastName || lastName || '';
@@ -35,8 +96,8 @@ export default function PhoneMockup({ userData = {}, className = '', interactive
     window.open(formattedUrl, '_blank', 'noopener,noreferrer');
   };
 
-  // Skeleton placeholders to keep device frame visually appealing when empty
-  const minSkeletonCount = Math.max(0, 4 - displayLinks.length);
+  // Static filler slots to keep device frame visually structured when empty
+  const minFillerCount = Math.max(0, 4 - displayLinks.length);
 
   return (
     <div className={`relative flex flex-col items-center justify-center p-4 ${className}`}>
@@ -50,11 +111,11 @@ export default function PhoneMockup({ userData = {}, className = '', interactive
         </div>
 
         {/* Inner Phone Screen */}
-        <div className="w-full h-full bg-[#0b0f19] rounded-[36px] pt-8 px-4 pb-6 flex flex-col items-center overflow-y-auto scrollbar-none border border-white/5 relative">
+        <div className={`w-full h-full ${theme.bgClass} rounded-[36px] pt-8 px-4 pb-6 flex flex-col items-center overflow-y-auto scrollbar-none border ${theme.cardBorder} relative transition-all duration-300`}>
           
           {/* Glass background decorative glow */}
-          <div className="absolute -top-12 -left-12 w-40 h-40 bg-purple-600/10 rounded-full blur-2xl pointer-events-none"></div>
-          <div className="absolute -bottom-12 -right-12 w-40 h-40 bg-indigo-600/10 rounded-full blur-2xl pointer-events-none"></div>
+          <div className={`absolute -top-12 -left-12 w-40 h-40 ${theme.glowColor} rounded-full blur-2xl pointer-events-none`}></div>
+          <div className={`absolute -bottom-12 -right-12 w-40 h-40 ${theme.glowColor} rounded-full blur-2xl pointer-events-none`}></div>
 
           {/* Profile Picture */}
           <div className="relative mt-4 mb-3">
@@ -66,15 +127,17 @@ export default function PhoneMockup({ userData = {}, className = '', interactive
                   className="w-full h-full object-cover rounded-full"
                 />
               </div>
+            ) : fullName ? (
+              <div className="w-24 h-24 rounded-full border-2 border-slate-700/60 bg-slate-800/80 flex flex-col items-center justify-center shadow-inner">
+                <span className="text-2xl font-bold text-indigo-400">
+                  {displayFirstName[0]?.toUpperCase()}{displayLastName[0]?.toUpperCase()}
+                </span>
+              </div>
             ) : (
-              <div className="w-24 h-24 rounded-full border-2 border-slate-700/60 bg-slate-800/80 flex flex-col items-center justify-center text-slate-500 shadow-inner">
-                {fullName ? (
-                  <span className="text-2xl font-bold text-indigo-400">
-                    {displayFirstName[0]?.toUpperCase()}{displayLastName[0]?.toUpperCase()}
-                  </span>
-                ) : (
-                  <div className="w-24 h-24 rounded-full animate-shimmer"></div>
-                )}
+              <div className="w-24 h-24 rounded-full border-2 border-dashed border-slate-700/60 bg-slate-800/30 flex items-center justify-center text-slate-600">
+                <svg className="w-10 h-10 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
               </div>
             )}
           </div>
@@ -82,22 +145,22 @@ export default function PhoneMockup({ userData = {}, className = '', interactive
           {/* User Full Name */}
           <div className="w-full text-center mb-1">
             {fullName ? (
-              <h2 className="text-lg font-bold text-slate-100 truncate px-2">
+              <h2 className={`text-lg font-bold ${theme.textPrimary} truncate px-2`}>
                 {fullName}
               </h2>
             ) : (
-              <div className="w-40 h-4 mx-auto rounded-full animate-shimmer my-1"></div>
+              <div className="w-36 h-3.5 mx-auto rounded-full bg-slate-800/40 border border-slate-700/30"></div>
             )}
           </div>
 
           {/* Email / Username */}
           <div className="w-full text-center mb-6">
             {displayEmail || displayUsername ? (
-              <p className="text-xs text-slate-400 truncate px-2 font-medium">
+              <p className={`text-xs ${theme.textSecondary} truncate px-2 font-medium`}>
                 {displayUsername ? `@${displayUsername}` : displayEmail}
               </p>
             ) : (
-              <div className="w-24 h-2.5 mx-auto rounded-full animate-shimmer my-1"></div>
+              <div className="w-20 h-2.5 mx-auto rounded-full bg-slate-800/30 border border-slate-700/20"></div>
             )}
           </div>
 
@@ -139,11 +202,11 @@ export default function PhoneMockup({ userData = {}, className = '', interactive
               );
             })}
 
-            {/* Skeleton Filler Links */}
-            {Array.from({ length: minSkeletonCount }).map((_, i) => (
+            {/* Clean Static Filler Link Slots */}
+            {Array.from({ length: minFillerCount }).map((_, i) => (
               <div
-                key={`skeleton-${i}`}
-                className="w-full h-11 rounded-xl animate-shimmer opacity-40"
+                key={`filler-${i}`}
+                className="w-full h-11 rounded-xl bg-slate-800/20 border border-dashed border-slate-700/30"
               ></div>
             ))}
           </div>

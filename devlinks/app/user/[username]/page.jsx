@@ -4,13 +4,16 @@ import React, { useEffect, useState } from 'react';
 import { getUser } from '@/app/backend/server';
 import { useRouter } from 'next/navigation';
 import { getPlatformConfig, PlatformIcon } from '@/app/components/PlatformIcons';
+import { getCardTheme } from '@/app/components/PhoneMockup';
 import Toast from '@/app/components/Toast';
+import QRCodeModal from '@/app/components/QRCodeModal';
 
 export default function UserPublicProfile({ params }) {
   const router = useRouter();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState({ message: '', type: 'success' });
+  const [isQRModalOpen, setIsQRModalOpen] = useState(false);
 
   useEffect(() => {
     if (!params?.username) {
@@ -69,13 +72,15 @@ export default function UserPublicProfile({ params }) {
   }
 
   const fullName = data ? `${data.name || ''} ${data.lastname || ''}`.trim() : 'Developer';
-  const username = data?.username || params?.username;
+  const username = data?.username || params?.username || 'developer';
   const userImage = data?.image || null;
   const userLinks = data?.links || [];
+  const cardTheme = getCardTheme(data?.theme || 'midnight');
 
   return (
     <div className="min-h-screen bg-[#0b0f19] text-slate-100 flex flex-col items-center justify-between p-4 relative overflow-hidden select-none">
       <Toast message={toast.message} type={toast.type} onClose={() => setToast({ message: '', type: 'success' })} />
+      <QRCodeModal username={username} isOpen={isQRModalOpen} onClose={() => setIsQRModalOpen(false)} />
 
       {/* Decorative ambient background glows */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-600/15 rounded-full blur-3xl pointer-events-none"></div>
@@ -90,19 +95,31 @@ export default function UserPublicProfile({ params }) {
           <span>✨ Create Your Own</span>
         </button>
 
-        <button
-          onClick={copyProfileUrl}
-          className="p-2 rounded-xl glass-panel text-slate-300 hover:text-white border border-white/10 transition-all"
-          title="Share Profile"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-          </svg>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIsQRModalOpen(true)}
+            className="p-2 rounded-xl glass-panel text-slate-300 hover:text-white border border-white/10 transition-all"
+            title="Show QR Code"
+          >
+            <svg className="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+            </svg>
+          </button>
+
+          <button
+            onClick={copyProfileUrl}
+            className="p-2 rounded-xl glass-panel text-slate-300 hover:text-white border border-white/10 transition-all"
+            title="Share Profile"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+            </svg>
+          </button>
+        </div>
       </header>
 
       {/* Profile Card Container */}
-      <main className="w-full max-w-md glass-panel rounded-3xl p-6 sm:p-8 flex flex-col items-center shadow-2xl border border-white/10 my-auto z-10 relative">
+      <main className={`w-full max-w-md ${cardTheme.bgClass} rounded-3xl p-6 sm:p-8 flex flex-col items-center shadow-2xl border ${cardTheme.cardBorder} my-auto z-10 relative transition-all duration-300`}>
         
         {/* Profile Avatar */}
         <div className="relative mb-4">
@@ -118,11 +135,11 @@ export default function UserPublicProfile({ params }) {
         </div>
 
         {/* User Name & Handle */}
-        <h1 className="text-xl sm:text-2xl font-extrabold text-white text-center tracking-tight">
+        <h1 className={`text-xl sm:text-2xl font-extrabold ${cardTheme.textPrimary} text-center tracking-tight`}>
           {fullName || `@${username}`}
         </h1>
 
-        <p className="text-xs font-semibold text-slate-400 mt-1 mb-6">
+        <p className={`text-xs font-semibold ${cardTheme.textSecondary} mt-1 mb-6`}>
           @{username}
         </p>
 
